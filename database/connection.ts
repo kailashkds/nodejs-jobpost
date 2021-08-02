@@ -1,11 +1,14 @@
 require('dotenv').config()
-import mysql from "mysql";
-export const conn  = mysql.createPool({
-    connectionLimit :  50,
-    host            :  process.env.DATABASE_HOST,
-    user            :  process.env.DATABASE_USER,
-    password        :  process.env.DATABASE_PASSWORD,
-    database        :  process.env.DB_DATABASE,
-    multipleStatements: true
-});
-// exports = {c:pool};
+export const dbConfig:any  ={
+    HOST: process.env.DATABASE_HOST,
+    USER: process.env.DATABASE_USER,
+    PASSWORD: process.env.DATABASE_PASSWORD,
+    DB: process.env.DB_DATABASE,
+    dialect: "mysql",
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  };
