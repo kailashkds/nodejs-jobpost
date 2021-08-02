@@ -1,17 +1,17 @@
 import EmailValidator from "email-validator";
 import { check, validationResult } from "express-validator";
-import {conn} from "../database/connection";
 import crypto from 'crypto';
-export const getclient=(req:any,res:any)=>{
-    conn.query('select * from user where role=1',(err:any,resdata:any)=>{
-        if(err){
-            res.status(501).json({success:false,msg:"internal server error",err:err})
-        }else{
-            res.json({success:true,msg:"All client get successfully.",data:resdata})
-        }
-    })
+import {User} from '../models';
+import { enedituser, engetuser, ensignup, getuseremail, getuserid } from "../entity/user";
+export const getclient=async(req:any,res:any)=>{
+    try {
+        let data=await engetuser(1)
+        res.json({success:true,msg:"All client get successfully.",data:data})
+    } catch (error) {
+        res.status(501).json({success:false,msg:"internal server error",err:err})
+    }
 }
-export const signup=(req:any,res:any)=>{
+export const signup=async(req:any,res:any)=>{
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const err = errors.array().map((err) => ({ field: err.param, message: err.msg }));
@@ -21,30 +21,26 @@ export const signup=(req:any,res:any)=>{
         });
         return;
     } else {
-        var {name,email,phone,password,company_name,address,city,state,country,zipcode}=req.body
-        email=email.toLowerCase()
-        if (EmailValidator.validate(email)) {
-            conn.query('select count(*) as cnt from user where email=?',[email],(err:any,resdat:any)=>{
-                if(err){
-                    res.status(501).json({success:false,msg:"internal server error",err:err})
-                }else if(resdat[0]['cnt']>0){
+       try {
+           var {email}=req.body
+           email=email.toLowerCase()
+           if (EmailValidator.validate(email)) {
+                let uemail=await getuseremail(email)
+                if(uemail){
                     res.status(201).json({success:false,msg:"user already exists."})
                 }else{
-                    conn.query(`insert into user(name,email,phone,password,company_name,address,city,state,country,zipcode,role) value(?,?,?,?,?,?,?,?,?,?,1)`,[name,email,phone,crypto.createHash('sha256').update(password, 'utf8').digest('hex'),company_name,address,city,state,country,zipcode],(err:any,resdata:any)=>{
-                        if(err){
-                            res.status(501).json({success:false,msg:"internal server error",err:err})
-                        }else{
-                            res.json({success:true,msg:"client signup successfully."})
-                        }
-                    })
+                    let usersignup=ensignup(req,1)
+                    res.json({success:true,msg:"user signup successfully."})    
                 }
-            })
-        }else{
-            res.send({ success: false, message: 'Invalid email address.' })
-        }
+           }else{
+               res.json({ success: false, message: 'Invalid email address.' })
+           }
+       } catch (error) {
+        res.status(501).json({success:false,msg:"internal server error",err:error})
+       }
     }
 }
-export const editclient=(req:any,res:any)=>{
+export const editclient=async(req:any,res:any)=>{
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const err = errors.array().map((err) => ({ field: err.param, message: err.msg }));
@@ -54,39 +50,17 @@ export const editclient=(req:any,res:any)=>{
         });
         return;
     } else {
-        const {name,phone,id}=req.body
-        conn.query('select count(*) as cnt from user where id=? and role=1',[id],(err:any,resdat:any)=>{
-            if(err){
-                res.status(501).json({success:false,msg:"internal server error",err:err})
-            }else if(resdat[0]['cnt']==0){
+        try {
+            const {id}=req.user.jwtdata
+            let udata=await getuserid(id)
+            if(!udata){
                 res.status(201).json({success:false,msg:"user not found."})
             }else{
-                conn.query(`update user set name=?,phone=? where id=?`,[name,phone,id],(err:any,resdata:any)=>{
-                    if(err){
-                        res.status(501).json({success:false,msg:"internal server error",err:err})
-                    }else{
-                        res.json({success:true,msg:"client edit successfully."})
-                    }
-                })
+                let dt=await enedituser(req,id)
+                res.json({success:true,msg:"Profile edit successfully."})
             }
-        })
-    }
-}
-export const deleteclient=(req:any,res:any)=>{
-    let userid=req.user.jwtdata['id']
-    conn.query('select count(*) as cnt from user where id=? and role=1',[userid],(err:any,resdat:any)=>{
-        if(err){
-            res.status(501).json({success:false,msg:"internal server error",err:err})
-        }else if(resdat[0]['cnt']==0){
-            res.status(201).json({success:false,msg:"user not found."})
-        }else{
-            conn.query(`update user set status=2 where id=?`,[userid],(err:any,resdata:any)=>{
-                if(err){
-                    res.status(501).json({success:false,msg:"internal server error",err:err})
-                }else{
-                    res.json({success:true,msg:"client delete successfully."})
-                }
-            })
+        } catch (e) {
+            res.status(501).json({success:false,msg:"internal server error",err:e})
         }
-    })
+    }
 }

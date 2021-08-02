@@ -2,8 +2,8 @@ import express from "express";
 import passport from "passport";
 import { check, validationResult } from "express-validator";
 var router=express.Router()
-import { signup,editclient,deleteclient,getclient} from "../controller/client.controller";
-import { getuserbyid } from "../controller/user.controller";
+import { signup,editclient,getclient} from "../controller/client.controller";
+import { deleteuser, getuserbyid } from "../controller/user.controller";
 /**
 * get all client.
 *
@@ -56,6 +56,6 @@ router.put('/',[
 * @version 1.0
 * @since   2021-07-27 
 */
-router.delete('/',passport.authenticate('clientAuth',{session:false}),deleteclient)
+router.delete('/',passport.authenticate('clientAuth',{session:false}),deleteuser)
 
 export =router

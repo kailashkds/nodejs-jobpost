@@ -37,6 +37,10 @@
     "email-validator": "^2.0.4",
     "express": "^4.17.1",
     "express-validator": "^6.12.1",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
+    "reflect-metadata": "^0.1.13",
+    "sequelize": "^6.6.5",
+    "swagger-express-ts": "^1.1.0"
   }
 }

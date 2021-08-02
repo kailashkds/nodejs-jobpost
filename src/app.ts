@@ -12,7 +12,6 @@ import jobRouter from '../routes/job.routes';
 require('../routes/passport');
 dotenv.config();
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 app.use(fileUpload());
@@ -27,6 +26,7 @@ app.use('/',commonRouter)
 app.use('/user',userRouter)
 app.use('/client',clientRouter)
 app.use('/job',jobRouter)
+
 app.listen(3000, () => {
     console.log(`Listening on port ${"PORT"}`);
 });

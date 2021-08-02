@@ -10,7 +10,7 @@ import { signup,edituser,deleteuser,getuser, getuserbyid} from "../controller/us
 * @version 1.0
 * @since   2021-07-27 
 */
-router.get('/',passport.authenticate('userAuth'),getuser)
+router.get('/',passport.authenticate('Auth',{session:false}),getuser)
 /**
 * add user.
 *
